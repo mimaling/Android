@@ -1,4 +1,4 @@
-name: Build APK
+name: Build Kivy APK
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  build-apk:
     runs-on: ubuntu-latest
 
     steps:
@@ -37,16 +37,26 @@ jobs:
             exit 1
           fi
 
-      - name: Build once to trigger SDK install
-        run: |
-          buildozer android clean || true
-          # This will install SDK and prompt for licenses
+      # 缓存 .buildozer 目录提高重复构建效率（可选但推荐）
+      - name: Cache .buildozer
+        uses: actions/cache@v4
+        with:
+          path: .buildozer
+          key: buildozer-cache-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
+          restore-keys: |
+            buildozer-cache-${{ runner.os }}
 
+      # 触发SDK的自动安装并准备license目录
+      - name: Trigger initial SDK install
+        run: buildozer android clean || true
+
+      # 自动接受 Android SDK 许可协议
       - name: Accept Android SDK licenses
         run: |
           yes | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
-      - name: Install build-tools
+      # 自动安装指定 build-tools 版本，防止 aidl 缺失
+      - name: Install required Android build-tools
         run: |
           yes | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;36.0.0" --sdk_root=$HOME/.buildozer/android/platform/android-sdk || true
 
