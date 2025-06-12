@@ -30,13 +30,25 @@ jobs:
           pip install cython
           pip install buildozer
 
-      - name: Check project structure and buildozer.spec
+      - name: Ensure buildozer.spec exists
         run: |
-          ls -al
           if [ ! -f buildozer.spec ]; then
             echo "buildozer.spec not found in root. Aborting."
             exit 1
           fi
+
+      - name: Build once to trigger SDK install
+        run: |
+          buildozer android clean || true
+          # This will install SDK and prompt for licenses
+
+      - name: Accept Android SDK licenses
+        run: |
+          yes | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
+
+      - name: Install build-tools
+        run: |
+          yes | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;36.0.0" --sdk_root=$HOME/.buildozer/android/platform/android-sdk || true
 
       - name: Build APK
         run: buildozer android debug
