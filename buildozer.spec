@@ -13,27 +13,8 @@ fullscreen = 1
 # 项目入口文件
 main.py = main_kivy.py
 
-# 包含的音频文件夹及格式
-android.presplash = 
-android.icon = 
-
-# 权限
+# 权限（如需访问文件、录音等可添加更多）
 android.permissions = INTERNET
-
-# 日志
-log_level = 2
 
 [buildozer]
 log_level = 2
-
-[android]
-# 额外依赖设置
-android.requirements = kivy,pygame
-
-# 如果有特殊 Java 依赖，请按需补充
-# android.add_jars =
-
-# 设置 Python 版本（可选）
-# python3 = True
-
-# 其它设置按需补充
