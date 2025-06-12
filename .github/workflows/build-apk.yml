@@ -37,7 +37,6 @@ jobs:
             exit 1
           fi
 
-      # 缓存 .buildozer 目录提高重复构建效率（可选但推荐）
       - name: Cache .buildozer
         uses: actions/cache@v4
         with:
@@ -46,16 +45,16 @@ jobs:
           restore-keys: |
             buildozer-cache-${{ runner.os }}
 
-      # 触发SDK的自动安装并准备license目录
+      # 先触发SDK安装（生成SDK目录结构）
       - name: Trigger initial SDK install
         run: buildozer android clean || true
 
-      # 自动接受 Android SDK 许可协议
+      # 自动接受Android SDK所有许可
       - name: Accept Android SDK licenses
         run: |
           yes | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
-      # 自动安装指定 build-tools 版本，防止 aidl 缺失
+      # 自动安装build-tools
       - name: Install required Android build-tools
         run: |
           yes | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;36.0.0" --sdk_root=$HOME/.buildozer/android/platform/android-sdk || true
