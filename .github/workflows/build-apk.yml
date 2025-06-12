@@ -22,7 +22,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-pip python3-setuptools git zip unzip openjdk-17-jdk libncurses5 libstdc++6
+          sudo apt-get install -y python3-pip python3-setuptools git zip unzip openjdk-17-jdk libstdc++6
 
       - name: Install Buildozer and dependencies
         run: |
