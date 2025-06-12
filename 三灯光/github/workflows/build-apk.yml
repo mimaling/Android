@@ -1,0 +1,63 @@
+name: Build Kivy APK
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip python3-setuptools git zip unzip openjdk-17-jdk libncurses5 libstdc++6
+
+      - name: Install Buildozer and dependencies
+        run: |
+          pip install --upgrade pip
+          pip install cython
+          pip install buildozer
+
+      - name: Cache buildozer .buildozer directory
+        uses: actions/cache@v4
+        with:
+          path: .buildozer
+          key: ${{ runner.os }}-buildozer-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-buildozer-
+
+      - name: Prepare buildozer.spec if not exists
+        run: |
+          if [ ! -f buildozer.spec ]; then
+            buildozer init
+          fi
+
+      - name: Update buildozer.spec for requirements and resources
+        run: |
+          sed -i 's/^requirements = .*/requirements = python3,kivy,pygame/' buildozer.spec
+          sed -i '/^source.include_exts = /s/$/,mp3/' buildozer.spec
+          sed -i "/^# source.include_dirs =/a source.include_dirs = 开始语,指令,结束语" buildozer.spec
+          sed -i '/^# log_level = /a log_level = 2' buildozer.spec
+          sed -i '/^# android.permissions = /a android.permissions = INTERNET' buildozer.spec
+
+      - name: Build APK
+        run: |
+          buildozer android debug
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kivy-app-apk
+          path: bin/*.apk
