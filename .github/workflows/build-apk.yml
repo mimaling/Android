@@ -30,25 +30,32 @@ jobs:
           pip install cython
           pip install buildozer
 
-      # 触发 Buildozer 自动安装 Android SDK
-      - name: Trigger Buildozer to install SDK
-        run: buildozer android clean || true
+      - name: Ensure buildozer.spec exists
+        run: |
+          if [ ! -f buildozer.spec ]; then
+            echo "buildozer.spec not found in root. Aborting."
+            exit 1
+          fi
 
-      # 自动接受 Android SDK 许可，并强制安装 build-tools
+      # 构建前先触发 SDK 下载
+      - name: Trigger SDK install (may fail, just to download SDK)
+        run: buildozer android debug || true
+
+      # 自动接受 SDK 许可并安装 build-tools, 兼容各种路径
       - name: Accept licenses and install build-tools
         run: |
           set -e
-          SDKMAN="$HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager"
           SDKROOT="$HOME/.buildozer/android/platform/android-sdk"
-          if [ -x "$SDKMAN" ]; then
-            yes | $SDKMAN --licenses --sdk_root=$SDKROOT
-            yes | $SDKMAN --licenses
-            yes | $SDKMAN "build-tools;36.0.0" --sdk_root=$SDKROOT
-            yes | $SDKMAN "platforms;android-33" --sdk_root=$SDKROOT
-          else
-            echo "sdkmanager not found! Buildozer may have failed to install SDK."
+          SDKMAN=$(find $SDKROOT -type f -name sdkmanager | head -n 1 || true)
+          echo "sdkmanager path: $SDKMAN"
+          if [ ! -x "$SDKMAN" ]; then
+            echo "sdkmanager not found! Here are possible locations:"
+            find $SDKROOT -type f -name sdkmanager || true
             exit 1
           fi
+          yes | $SDKMAN --licenses --sdk_root=$SDKROOT
+          yes | $SDKMAN "build-tools;36.0.0" --sdk_root=$SDKROOT
+          yes | $SDKMAN "platforms;android-33" --sdk_root=$SDKROOT
 
       - name: Build APK
         run: buildozer android debug
