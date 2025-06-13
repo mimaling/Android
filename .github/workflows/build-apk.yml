@@ -36,8 +36,8 @@ jobs:
             echo "Install ant failed, retrying ($i/3)..."
             sleep 10
           done
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v2
+      - name: Setup Android SDK Tools 
+        uses: android-actions/setup-android@v3.2.2
       - name: Accept Android licenses
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
       - name: Install required Android components (with retries)
