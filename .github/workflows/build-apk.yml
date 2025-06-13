@@ -36,6 +36,8 @@ jobs:
             echo "Install ant failed, retrying ($i/3)..."
             sleep 10
           done
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
       - name: Set Android tool environment variables
         run: |
           echo "ANDROID_ANT_HOME=/usr/share/ant" >> $GITHUB_ENV
@@ -46,10 +48,6 @@ jobs:
           ant -version
           which javac
           javac -version
-      - name: Accept Android SDK licenses
-        run: |
-          sdkmanager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
-          yes | "$sdkmanager" --licenses
       - name: Install buildozer and Cython (retry)
         run: |
           for i in 1 2 3; do
