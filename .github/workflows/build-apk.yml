@@ -27,6 +27,9 @@ jobs:
             autoconf automake libtool libtool-bin pkg-config build-essential g++ \
             zlib1g-dev libncurses5-dev libffi-dev ffmpeg
 
+      - name: Install Apache ANT
+        run: sudo apt-get install -y ant
+
       - name: Install buildozer and Cython
         run: |
           python -m pip install --upgrade pip
