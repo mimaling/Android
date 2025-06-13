@@ -69,8 +69,13 @@ jobs:
             echo "Buildozer build failed, retrying ($i/3)..."
             sleep 10
           done
+      - name: Debug - List all APK files
+        run: |
+          echo "Searching for APK files..."
+          find . -name "*.apk" -print
+          echo "APK search complete"
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: kivy-app-apk
-          path: .buildozer/android/platform/build-armeabi-v7a/dists/*/bin/*.apk
+          path: '**/*.apk'
