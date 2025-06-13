@@ -46,6 +46,10 @@ jobs:
           ant -version
           which javac
           javac -version
+      - name: Accept Android SDK licenses
+        run: |
+          $sdkmanager = "$env:ANDROID_HOME\cmdline-tools\latest\bin\sdkmanager.bat"
+          & $sdkmanager --licenses | ForEach-Object { Write-Output 'y' }
       - name: Install buildozer and Cython (retry)
         run: |
           for i in 1 2 3; do
