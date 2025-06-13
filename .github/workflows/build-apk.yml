@@ -9,9 +9,6 @@ on:
 jobs:
   build-apk:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      max-attempts: 3
 
     steps:
       - name: Checkout code
@@ -46,9 +43,12 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Build APK
-        run: |
-          buildozer android debug
+      - name: Build APK (with retry)
+        uses: nick-invision/retry@v3
+        with:
+          timeout_minutes: 60
+          max_attempts: 3
+          command: buildozer android debug
 
       - name: List root directory
         run: ls -l
