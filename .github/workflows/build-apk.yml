@@ -27,9 +27,6 @@ jobs:
             autoconf automake libtool libtool-bin pkg-config build-essential g++ \
             zlib1g-dev libncurses5-dev libffi-dev ffmpeg
 
-      - name: Accept Android SDK licenses
-        run: yes | sdkmanager --licenses || true
-
       - name: Install Apache ANT
         run: sudo apt-get install -y ant
 
@@ -38,6 +35,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install cython==0.29.36
           pip install buildozer
+
+      - name: Pre-accept Android SDK licenses for buildozer
+        run: |
+          export ANDROID_SDK_ROOT=$HOME/.buildozer/android/platform/android-sdk
+          mkdir -p $ANDROID_SDK_ROOT/licenses
+          echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55\n84831b9409646a918e30573bab4c9c91346d8abd" > $ANDROID_SDK_ROOT/licenses/android-sdk-license
+          echo -e "d56f2edc556faefc5f4e8d94a2029831fae4c4a3" > $ANDROID_SDK_ROOT/licenses/android-sdk-preview-license
 
       - name: Install project dependencies
         run: |
