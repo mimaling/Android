@@ -2,8 +2,7 @@ name: Build Kivy APK
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
 
 jobs:
@@ -33,16 +32,19 @@ jobs:
           pip install cython==0.29.36
           pip install buildozer
 
-      - name: Ensure Android cmdline-tools for buildozer
+      - name: Prepare Android SDK cmdline-tools for buildozer
         run: |
           SDK_ROOT=$HOME/.buildozer/android/platform/android-sdk
           mkdir -p $SDK_ROOT/cmdline-tools
           wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O /tmp/cmdline-tools.zip
           unzip -q /tmp/cmdline-tools.zip -d $SDK_ROOT/cmdline-tools
-          # 由于下载下来是cmdline-tools/cmdline-tools/，要把内容移到latest
+          # 移动内容到 latest 子目录
           mkdir -p $SDK_ROOT/cmdline-tools/latest
           mv $SDK_ROOT/cmdline-tools/cmdline-tools/* $SDK_ROOT/cmdline-tools/latest/
           rm -rf $SDK_ROOT/cmdline-tools/cmdline-tools
+          # 关键步骤：为 p4a/buildozer 创建 tools/bin 软链接
+          mkdir -p $SDK_ROOT/tools
+          ln -s $SDK_ROOT/cmdline-tools/latest $SDK_ROOT/tools/bin
 
       - name: Set ANDROID_SDK_ROOT and PATH
         run: |
