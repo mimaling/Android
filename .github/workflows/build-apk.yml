@@ -14,6 +14,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Disable BuildKit
+        run: echo "DOCKER_BUILDKIT=0" >> $GITHUB_ENV
+
+      - name: Docker pull Buildozer
+        run: docker pull kivy/buildozer
+
       - name: Build APK using Buildozer Docker
         run: |
           docker run --rm -v $PWD:/home/user/app -w /home/user/app kivy/buildozer buildozer android debug
