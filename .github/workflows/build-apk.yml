@@ -37,11 +37,11 @@ jobs:
             exit 1
           fi
 
-      # 构建前先触发 SDK 下载
+      # 先触发SDK下载，哪怕失败也没关系
       - name: Trigger SDK install (may fail, just to download SDK)
         run: buildozer android debug || true
 
-      # 自动接受 SDK 许可并安装 build-tools, 兼容各种路径
+      # 自动接受 SDK license 并安装 build-tools，兼容任意 sdkmanager 路径
       - name: Accept licenses and install build-tools
         run: |
           set -e
