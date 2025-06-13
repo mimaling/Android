@@ -27,7 +27,7 @@ jobs:
             autoconf automake libtool libtool-bin pkg-config build-essential g++ \
             zlib1g-dev libncurses5-dev libffi-dev
 
-      - name: Install Buildozer and dependencies
+      - name: Install Buildozer
         run: |
           pip install --upgrade pip
           pip install cython
@@ -57,6 +57,8 @@ jobs:
           yes | $SDKMAN --licenses --sdk_root=$SDKROOT
           yes | $SDKMAN "build-tools;36.0.0" --sdk_root=$SDKROOT
           yes | $SDKMAN "platforms;android-33" --sdk_root=$SDKROOT
+          echo "AIDL binary:"
+          find $SDKROOT -type f -name aidl || true
 
       - name: Build APK
         run: buildozer android debug
