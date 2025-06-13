@@ -41,22 +41,22 @@ jobs:
       - name: Accept Android licenses
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
       - name: Install required Android components (with retries)
-  run: |
-    for i in 1 2 3; do
-      if $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;36.0.0" "platform-tools"; then
-        break
-      elif $ANDROID_HOME/tools/bin/sdkmanager "build-tools;36.0.0" "platform-tools"; then
-        echo "Using alternative sdkmanager path"
-        break
-      else
-        echo "Android component installation failed, retrying ($i/3)..."
-        sleep 10
-      fi
-    done
-    if [ ! -d "$ANDROID_HOME/build-tools/36.0.0" ]; then
-      echo "Build tools not found after installation attempts"
-      exit 1
-    fi
+        run: |
+          for i in 1 2 3; do
+            if $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;36.0.0" "platform-tools"; then
+              break
+            elif $ANDROID_HOME/tools/bin/sdkmanager "build-tools;36.0.0" "platform-tools"; then
+              echo "Using alternative sdkmanager path"
+              break
+            else
+              echo "Android component installation failed, retrying ($i/3)..."
+              sleep 10
+            fi
+          done
+          if [ ! -d "$ANDROID_HOME/build-tools/36.0.0" ]; then
+            echo "Build tools not found after installation attempts"
+            exit 1
+          fi
       - name: Set Android tool environment variables
         run: |
           echo "ANDROID_ANT_HOME=/usr/share/ant" >> $GITHUB_ENV
