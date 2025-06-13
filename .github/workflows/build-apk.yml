@@ -15,7 +15,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Disable BuildKit
-        run: echo "DOCKER_BUILDKIT=0" >> $GITHUB_ENV
+        run: |
+          echo "DOCKER_BUILDKIT=0" | sudo tee -a /etc/environment
+          echo "DOCKER_BUILDKIT=0" >> $GITHUB_ENV
 
       - name: Docker pull Buildozer
         run: docker pull kivy/buildozer
