@@ -1,4 +1,4 @@
-name: Build Kivy APK (Docker)
+name: Build Kivy APK
 
 on:
   push:
@@ -14,17 +14,32 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Disable BuildKit
-        run: |
-          echo "DOCKER_BUILDKIT=0" | sudo tee -a /etc/environment
-          echo "DOCKER_BUILDKIT=0" >> $GITHUB_ENV
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
 
-      - name: Docker pull Buildozer
-        run: docker pull kivy/buildozer
-
-      - name: Build APK using Buildozer Docker
+      - name: Install system dependencies
         run: |
-          docker run --rm -v $PWD:/home/user/app -w /home/user/app kivy/buildozer buildozer android debug
+          sudo apt-get update
+          sudo apt-get install -y \
+            python3-pip python3-setuptools git zip unzip openjdk-17-jdk \
+            autoconf automake libtool libtool-bin pkg-config build-essential g++ \
+            zlib1g-dev libncurses5-dev libffi-dev ffmpeg
+
+      - name: Install buildozer and Cython
+        run: |
+          python -m pip install --upgrade pip
+          pip install cython==0.29.36
+          pip install buildozer
+
+      - name: Install project dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Build APK
+        run: |
+          buildozer android debug
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
