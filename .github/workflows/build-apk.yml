@@ -1,4 +1,4 @@
-name: Build Kivy APK
+name: Build APK with Setup-Buildozer Action
 
 on:
   push:
@@ -7,31 +7,14 @@ on:
   pull_request:
 
 jobs:
-  build-apk:
+  build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            python3-pip python3-setuptools git zip unzip openjdk-17-jdk libstdc++6 \
-            autoconf automake libtool libtool-bin pkg-config build-essential g++ \
-            zlib1g-dev libncurses5-dev libffi-dev
-
-      - name: Install Buildozer
-        run: |
-          pip install --upgrade pip
-          pip install cython
-          pip install buildozer
+      - name: Setup Buildozer
+        uses: tlambert03/setup-buildozer@v1
 
       - name: Ensure buildozer.spec exists
         run: |
@@ -39,26 +22,6 @@ jobs:
             echo "buildozer.spec not found in root. Aborting."
             exit 1
           fi
-
-      - name: Trigger SDK install (may fail, just to download SDK)
-        run: buildozer android debug || true
-
-      - name: Accept licenses and install build-tools
-        run: |
-          set -e
-          SDKROOT="$HOME/.buildozer/android/platform/android-sdk"
-          SDKMAN=$(find $SDKROOT -type f -name sdkmanager | head -n 1 || true)
-          echo "sdkmanager path: $SDKMAN"
-          if [ ! -x "$SDKMAN" ]; then
-            echo "sdkmanager not found! Here are possible locations:"
-            find $SDKROOT -type f -name sdkmanager || true
-            exit 1
-          fi
-          yes | $SDKMAN --licenses --sdk_root=$SDKROOT
-          yes | $SDKMAN "build-tools;36.0.0" --sdk_root=$SDKROOT
-          yes | $SDKMAN "platforms;android-33" --sdk_root=$SDKROOT
-          echo "AIDL binary:"
-          find $SDKROOT -type f -name aidl || true
 
       - name: Build APK
         run: buildozer android debug
