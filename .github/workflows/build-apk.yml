@@ -62,10 +62,13 @@ jobs:
             echo "Install requirements.txt failed, retrying ($i/3)..."
             sleep 10
           done
-      - name: Build APK (retry)
+      - name: Accept Android SDK licenses
+        run: |
+          yes | /home/runner/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager --licenses
+      - name: Build APK
         run: |
           for i in 1 2 3; do
-            buildozer android debug --accept-licenses=android-sdk-license-c81a61d9 && break
+            buildozer android debug && break
             echo "Buildozer build failed, retrying ($i/3)..."
             sleep 10
           done
