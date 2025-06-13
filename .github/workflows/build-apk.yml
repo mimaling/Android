@@ -45,19 +45,31 @@ jobs:
           restore-keys: |
             buildozer-cache-${{ runner.os }}
 
-      # 先触发SDK安装（生成SDK目录结构）
+      # 先触发SDK安装，生成SDK结构
       - name: Trigger initial SDK install
         run: buildozer android clean || true
 
-      # 自动接受Android SDK所有许可
-      - name: Accept Android SDK licenses
+      # 自动接受NDK/SDK所有许可（多次保险）
+      - name: Accept Android SDK licenses (all locations)
         run: |
-          yes | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          set -e
+          SDKMAN="$HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager"
+          SDKROOT="$HOME/.buildozer/android/platform/android-sdk"
+          if [ -x "$SDKMAN" ]; then
+            yes | $SDKMAN --licenses --sdk_root=$SDKROOT
+            yes | $SDKMAN --licenses      # legacy
+          fi
 
-      # 自动安装build-tools
-      - name: Install required Android build-tools
+      # 自动安装build-tools及常用平台
+      - name: Install required Android build-tools and platforms
         run: |
-          yes | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;36.0.0" --sdk_root=$HOME/.buildozer/android/platform/android-sdk || true
+          set -e
+          SDKMAN="$HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager"
+          SDKROOT="$HOME/.buildozer/android/platform/android-sdk"
+          if [ -x "$SDKMAN" ]; then
+            yes | $SDKMAN "build-tools;36.0.0" --sdk_root=$SDKROOT
+            yes | $SDKMAN "platforms;android-33" --sdk_root=$SDKROOT
+          fi
 
       - name: Build APK
         run: buildozer android debug
