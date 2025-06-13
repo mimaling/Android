@@ -19,62 +19,39 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install system dependencies (retry)
+      - name: Install system dependencies
         run: |
-          for i in 1 2 3; do
-            sudo apt-get update && sudo apt-get install -y \
-              python3-pip python3-setuptools git zip unzip openjdk-17-jdk \
-              autoconf automake libtool libtool-bin pkg-config build-essential g++ \
-              zlib1g-dev libncurses5-dev libffi-dev ffmpeg adb && break
-            echo "Install system dependencies failed, retrying ($i/3)..."
-            sleep 10
-          done
+          sudo apt-get update
+          sudo apt-get install -y \
+            python3-pip python3-setuptools git zip unzip openjdk-17-jdk \
+            autoconf automake libtool libtool-bin pkg-config build-essential g++ \
+            zlib1g-dev libncurses5-dev libffi-dev ffmpeg
 
-      - name: Install Apache ANT (retry)
-        run: |
-          for i in 1 2 3; do
-            sudo apt-get install -y ant && break
-            echo "Install ant failed, retrying ($i/3)..."
-            sleep 10
-          done
+      - name: Install Apache ANT
+        run: sudo apt-get install -y ant
 
-      - name: Set Android tool environment variables
+      - name: Install buildozer and Cython
         run: |
-          echo "ANDROID_ANT_HOME=/usr/share/ant" >> $GITHUB_ENV
-          echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
+          python -m pip install --upgrade pip
+          pip install cython==0.29.36
+          pip install buildozer
 
-      - name: Debug ant and Java
+      - name: Install project dependencies
         run: |
-          which ant
-          ant -version
-          which javac
-          javac -version
+          pip install -r requirements.txt
 
-      - name: Install buildozer and Cython (retry)
+      - name: Build APK
         run: |
-          for i in 1 2 3; do
-            python -m pip install --upgrade pip && \
-            pip install cython==0.29.36 && \
-            pip install buildozer && break
-            echo "Install buildozer and cython failed, retrying ($i/3)..."
-            sleep 10
-          done
+          buildozer android debug
 
-      - name: Install project dependencies (retry)
-        run: |
-          for i in 1 2 3; do
-            pip install -r requirements.txt && break
-            echo "Install requirements.txt failed, retrying ($i/3)..."
-            sleep 10
-          done
+      - name: List root directory
+        run: ls -l
 
-      - name: Build APK (retry)
-        run: |
-          for i in 1 2 3; do
-            buildozer android debug && break
-            echo "Buildozer build failed, retrying ($i/3)..."
-            sleep 10
-          done
+      - name: List bin directory
+        run: ls -l bin || echo "bin directory not found"
+
+      - name: Print buildozer log (if exists)
+        run: cat .buildozer/android/platform/build-arm64-v8a/build/outputs/log.txt || echo "No buildozer log found"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
